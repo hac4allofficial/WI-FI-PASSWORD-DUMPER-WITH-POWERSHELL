@@ -7,17 +7,17 @@ $charset  = $charset | Select-Object -uniq
 function Get-NextPassword() {
     param(
         $Password
-    )
-    
-    #Start with nothing
+    )    
+        
     if (($Password -eq $null) -or ($Password -eq '')) {
+        #Started with nothing, return the first item of the character set.
         return [string]$charset[0]
     }
     else {
-        for ($pass_pos = ($Password.Length - 1); $pass_pos -ge 0; $pass_pos--) {
-            #Overflow
-            $index = [array]::indexOf($charset, [char]$Password[$pass_pos])
-            if ($index -eq $charset.Length - 1) {
+        for ($pass_pos = ($Password.Length - 1); $pass_pos -ge 0; $pass_pos--) {            
+            $charset_pos = [array]::indexOf($charset, [char]$Password[$pass_pos])
+            if ($charset_pos -eq $charset.Length - 1) {
+                #Overflow of the current password position.
                 $tempArray = $Password[0..$Password.Length]
                 $tempArray[$pass_pos] = $charset[0]
                 $Password = $tempArray -join ""
@@ -27,10 +27,11 @@ function Get-NextPassword() {
                 }
             }
             else {
+                #No overflow, update the current position +1 of the current character.
                 $tempArray = $Password[0..$Password.Length]
-                $tempArray[$pass_pos] = $charset[$index+1]
+                $tempArray[$pass_pos] = $charset[$charset_pos+1]
                 $Password = $tempArray -join ""
-                break
+                break #No overflow, therefore break the loop.
             }
         }    
         return $Password
